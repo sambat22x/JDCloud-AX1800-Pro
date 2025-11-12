@@ -124,3 +124,29 @@ find package/luci-theme-*/* -type f -name '*luci-theme-*' -print -exec sed -i '/
 
 ./scripts/feeds update -a
 ./scripts/feeds install -a
+
+#
+# -----------------------------------------------------------------
+# START: CUSTOM PATCHES
+# -----------------------------------------------------------------
+
+# --- 1. 1GB RAM PATCH FOR JD CLOUD AX1800 PRO ---
+echo "Applying 1GB RAM patch for AX1800 Pro..."
+DTS_FILE=$(find ./ -name "ipq6018-jdcloud-ax1800-pro.dts")
+if [ -f "$DTS_FILE" ]; then
+    echo "Found DTS file at $DTS_FILE"
+    sed -i 's/reg = <0x41000000 0x20000000>;/reg = <0x41000000 0x40000000>;/g' $DTS_FILE
+    sed -i 's/\/* 512 MiB \*\//\/* 1024 MiB \*\//g' $DTS_FILE
+    echo "1GB RAM patch applied successfully."
+else
+    echo "WARNING: Could not find the .dts file to patch for 1GB RAM."
+fi
+
+# --- 2. CUSTOM LAN IP ADDRESS PATCH (10.1.1.1) ---
+echo "Setting custom LAN IP to 10.1.1.1..."
+sed -i "s/option ipaddr '192.168.1.1'/option ipaddr '10.1.1.1'/g" package/base-files/files/bin/config_generate
+echo "Custom LAN IP set to 10.1.1.1."
+
+# -----------------------------------------------------------------
+# END: CUSTOM PATCHES
+# -----------------------------------------------------------------
